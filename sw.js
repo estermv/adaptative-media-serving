@@ -22,9 +22,37 @@ function getMediaQuality() {
     }
 }
 
+function saveToCache(request) {
+  return function (response) {
+    if(!response || response.status !== 200 || response.type !== 'basic') {
+      return response;
+    }
+
+    const responseToCache = response.clone();
+
+    caches.open("imageQualityCache")
+      .then(function(cache) {
+        cache.put(request, responseToCache);
+      });
+
+    return response;
+  }
+}
+
 self.addEventListener('fetch', function(event) {
   if (/\.jpg$|.png$|.webp$/.test(event.request.url)) {
+    const quality = getMediaQuality();
     const url = event.request.url.replace(/(\.[\w\d_-]+)$/i, getMediaQuality() + '$1');
-    event.respondWith(fetch(url));
+
+    event.respondWith(
+      caches.match(event.request)
+        .then(function(response) {
+          if (response) {
+            return response;
+          }
+
+          return fetch(url).then(saveToCache(event.request))
+      })
+    );
   }
 });
