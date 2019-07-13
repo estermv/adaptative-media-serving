@@ -1,10 +1,10 @@
 {
-  "name": "Adaptative media serving",
+  "name": "adaptative-media-serving",
   "version": "1.0.0",
   "description": "",
   "main": "sw.js",
   "scripts": {
-    "start": "http-server",
+    "start": "http-server"
   },
   "author": "",
   "license": "ISC",
