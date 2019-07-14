@@ -22,21 +22,19 @@ function getMediaQuality() {
     }
 }
 
-function saveToCache(request) {
-  return function (response) {
-    if(!response || response.status !== 200 || response.type !== 'basic') {
-      return response;
-    }
-
-    const responseToCache = response.clone();
-
-    caches.open("imageQualityCache")
-      .then(function(cache) {
-        cache.put(request, responseToCache);
-      });
-
+function saveToCache(request, response) {
+  if(!response || response.status !== 200 || response.type !== 'basic') {
     return response;
   }
+
+  const responseToCache = response.clone();
+
+  caches.open("imageQualityCache")
+    .then(function(cache) {
+      cache.put(request, responseToCache);
+    });
+
+  return response;
 }
 
 self.addEventListener('fetch', function(event) {
@@ -51,7 +49,7 @@ self.addEventListener('fetch', function(event) {
             return response;
           }
 
-          return fetch(url).then(saveToCache(event.request))
+          return fetch(url).then(saveToCache.bind(this, event.request))
       })
     );
   }
